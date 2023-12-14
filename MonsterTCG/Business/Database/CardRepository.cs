@@ -124,7 +124,7 @@ namespace MonsterTCG.Business.Database
 					var selectSql = @"
 					SELECT guid 
 					FROM cards 
-					WHERE guid NOT IN (SELECT guid FROM stacks) 
+					WHERE guid NOT IN (SELECT card_guid FROM stacks) 
 					LIMIT 5";
 
 					var cardsToInsert = new List<Guid>();

@@ -19,7 +19,7 @@ namespace MonsterTCG.Business.Database
 				var createPlayerTableCmd = new NpgsqlCommand(
 					"CREATE TABLE IF NOT EXISTS players (" +
 					"id SERIAL PRIMARY KEY, " +
-					"accountname VARCHAR(50), " +
+					"accountname VARCHAR(50) UNIQUE, " +
 					"password VARCHAR(100), " +
 					"name VARCHAR(50), " +
 					"coins INT, " +
@@ -51,7 +51,7 @@ namespace MonsterTCG.Business.Database
 				var createCardTableCmd = new NpgsqlCommand(
 					"CREATE TABLE IF NOT EXISTS cards (" +
 					"id SERIAL PRIMARY KEY, " +
-					"guid UUID, " +
+					"guid UUID UNIQUE, " +
 					"name VARCHAR(50), " +
 					"type VARCHAR(50), " +
 					"element VARCHAR(50), " +

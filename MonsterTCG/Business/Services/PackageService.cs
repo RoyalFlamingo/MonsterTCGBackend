@@ -46,10 +46,16 @@ namespace MonsterTCG.Business.Services
 			if(player == null)
 				throw new UnauthorizedAccessException();
 
-			if(player.Coins < 5)
+			if (player.Coins < 5)
+				throw new InsufficientCoinsException();
+			
+			if (!await _cardRepository.BuyPackage(player))
 				return false;
 
-			if (!await _cardRepository.BuyPackage(player))
+			//remove 5 coins after buying the package
+			player.Coins -= 5;
+
+			if (!await _playerRepository.UpdatePlayer(player))
 				return false;
 
 			return true;

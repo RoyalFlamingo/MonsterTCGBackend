@@ -3,6 +3,7 @@ using MonsterTCG.Business.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -11,10 +12,12 @@ namespace MonsterTCG.Business.Services
 	class PlayerService
 	{
 		private readonly PlayerRepository _playerRepository;
+		private readonly CardRepository _cardRepository;
 
 		public PlayerService()
 		{
 			_playerRepository = new PlayerRepository();
+			_cardRepository = new CardRepository();
 		}
 
 		public string GenerateToken(string playername)
@@ -163,9 +166,42 @@ namespace MonsterTCG.Business.Services
 		/// Gets the player stats from the database
 		/// </summary>
 		/// <returns>stats or null if not found</returns>
-		public async Task<List<PlayerStats>> GetScoreboard()
+		public async Task<List<PlayerStats>> GetScoreboard(string token)
 		{
+			if (token == "")
+				throw new UnauthorizedAccessException();
+
+			var tokenPlayer = await _playerRepository.GetPlayer(token);
+
+			if (tokenPlayer == null)
+				throw new UnauthorizedAccessException();
+
 			return await _playerRepository.GetScoreboard();
+		}
+
+		/// <summary>
+		/// Enters the battle queue and waits for an opponent
+		/// </summary>
+		/// <returns>true if the battle has been carried out</returns>
+		public async Task<bool> Battle(string token)
+		{
+			if (token == "")
+				throw new UnauthorizedAccessException();
+
+			var tokenPlayer = await _playerRepository.GetPlayer(token);
+
+			if (tokenPlayer == null)
+				throw new UnauthorizedAccessException();
+
+			var playerDeck = await _cardRepository.GetDeck(tokenPlayer.Id);
+			if (playerDeck.Count() < 4) //player needs at least 4 cards in his deck to enter battle
+				throw new InsufficientDeckSizeException();
+
+			var playerStack = await _cardRepository.GetStack(tokenPlayer.Id);
+
+			var battleQueue = BattleQueue.GetInstance();
+
+			return battleQueue.EnterBattle(new GamePlayer(tokenPlayer, playerDeck, playerStack)); //only returns true if at least 2 players were in the queue
 		}
 	}
 }

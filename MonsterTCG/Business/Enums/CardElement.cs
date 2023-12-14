@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonsterTCG.Business.Enums
 {
-	enum CardElement
+	public enum CardElement
 	{
 		Normal,
 		Fire,

@@ -260,12 +260,66 @@ namespace MonsterTCG.Controllers
 				if (token == null)
 					throw new UnauthorizedAccessException();
 
-				var scoreboard = await _playerService.GetScoreboard();
+				var scoreboard = await _playerService.GetScoreboard(token);
 
 				return new Response
 				{
 					StatusCode = HttpStatusCode.OK,
 					Content = JsonConvert.SerializeObject(scoreboard)
+				};
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Unauthorized,
+					Content = "Access token is missing or invalid"
+				};
+			}
+			catch (Exception ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Content = $"The server responded with following error: {ex.Message}"
+				};
+			}
+		}
+
+
+		[Route("POST", "/battles")]
+		public async Task<Response> Battle(Request request)
+		{
+			try
+			{
+				var token = request.Headers["Authorization"];
+
+				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				if (await _playerService.Battle(token))
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.OK,
+						Content = "The battle has been carried out successfully."
+					};
+				}
+				else
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.Accepted,
+						Content = "Player entered the battle queue."
+					};
+				}
+			}
+			catch (InsufficientDeckSizeException ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Conflict,
+					Content = ex.Message
 				};
 			}
 			catch (UnauthorizedAccessException)

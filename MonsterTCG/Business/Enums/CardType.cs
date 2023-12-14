@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonsterTCG.Business.Enums
 {
-	enum CardType
+	public enum CardType
 	{
 		Monster,
 		Spell

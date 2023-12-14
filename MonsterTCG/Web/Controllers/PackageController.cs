@@ -120,6 +120,14 @@ namespace MonsterTCG.Controllers
 					};
 				}
 			}
+			catch (InsufficientCoinsException ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Forbidden,
+					Content = ex.Message
+				};
+			}
 			catch (PostgresException)
 			{
 				return new Response

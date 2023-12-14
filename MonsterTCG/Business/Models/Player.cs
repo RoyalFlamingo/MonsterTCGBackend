@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace MonsterTCG.Business.Models
 {
-	class Player
+	public class Player
 	{
 		public int Id { get; set; }
 		public string? AccountName { get; set; }

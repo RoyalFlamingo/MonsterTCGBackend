@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MonsterTCG.Business.Models
 {
-	class Card
+	public class Card
 	{
 		[Newtonsoft.Json.JsonIgnore]
 		public int Id { get; set; }
