@@ -4,6 +4,7 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using MonsterTCG.Business.Models;
 using Npgsql;
 
@@ -132,6 +133,36 @@ namespace MonsterTCG.Business.Database
 			}
 
 			return null;
+		}
+
+		public async Task<List<PlayerStats>> GetScoreboard()
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+			List<PlayerStats> players = new List<PlayerStats>();
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+
+				using (var command = new NpgsqlCommand("SELECT name, elo, wins, losses FROM players ORDER BY elo DESC", connection))
+				{
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						while (await reader.ReadAsync())
+						{
+							PlayerStats playerStats = new PlayerStats();
+							playerStats.Name = reader.GetString(reader.GetOrdinal("name"));
+							playerStats.Elo = reader.GetInt32(reader.GetOrdinal("elo"));
+							playerStats.Wins = reader.GetInt32(reader.GetOrdinal("wins"));
+							playerStats.Losses = reader.GetInt32(reader.GetOrdinal("losses"));
+
+							players.Add(playerStats);
+						}
+					}
+				}
+			}
+
+			return players;
 		}
 
 		/// <summary>

@@ -1,10 +1,10 @@
 ﻿using System.Net;
 using System.Runtime.InteropServices;
-using System.Text.Json;
 using MonsterTCG.Http;
 using MonsterTCG.Business;
 using MonsterTCG.Business.Services;
 using MonsterTCG.Business.Models;
+using Newtonsoft.Json;
 
 
 
@@ -26,7 +26,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var requestData = JsonSerializer.Deserialize<Dictionary<string, string>>(request.Body);
+				var requestData = JsonConvert.DeserializeObject<Dictionary<string, string>>(request.Body);
 				var username = requestData["Username"];
 				var password = requestData["Password"];
 
@@ -77,7 +77,7 @@ namespace MonsterTCG.Controllers
 					return new Response
 					{
 						StatusCode = HttpStatusCode.OK,
-						Content = JsonSerializer.Serialize(new
+						Content = JsonConvert.SerializeObject(new
 						{
 							Name = player.Name,
 							Bio = player.Bio,
@@ -120,10 +120,10 @@ namespace MonsterTCG.Controllers
 			{
 				var token = request.Headers["Authorization"];
 
-				if(token == null)
+				if (token == null)
 					throw new UnauthorizedAccessException();
 
-				var requestData = JsonSerializer.Deserialize<Player>(request.Body);
+				var requestData = JsonConvert.DeserializeObject<Player>(request.Body);
 				requestData.AccountName = username;
 
 				if (await _playerService.UpdatePlayer(requestData, token))
@@ -166,7 +166,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var requestData = JsonSerializer.Deserialize<Dictionary<string, string>>(request.Body);
+				var requestData = JsonConvert.DeserializeObject<Dictionary<string, string>>(request.Body);
 				var username = requestData["Username"];
 				var password = requestData["Password"];
 
@@ -186,6 +186,95 @@ namespace MonsterTCG.Controllers
 						Content = "User with same username already registered"
 					};
 				}
+			}
+			catch (Exception ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Content = $"The server responded with following error: {ex.Message}"
+				};
+			}
+		}
+
+		/// <summary>
+		/// Return the player stats
+		/// </summary>
+		[Route("GET", "/stats")]
+		public async Task<Response> GetStats(Request request)
+		{
+			try
+			{
+				var token = request.Headers["Authorization"];
+
+				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var playerStats = await _playerService.GetStats(token);
+
+				if (playerStats != null)
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.OK,
+						Content = JsonConvert.SerializeObject(playerStats)
+					};
+				}
+				else
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.NotFound,
+						Content = "User not found."
+					};
+				}
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Unauthorized,
+					Content = "Access token is missing or invalid"
+				};
+			}
+			catch (Exception ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Content = $"The server responded with following error: {ex.Message}"
+				};
+			}
+		}
+
+		/// <summary>
+		/// Return the scoreboard
+		/// </summary>
+		[Route("GET", "/scoreboard")]
+		public async Task<Response> GetScoreboard(Request request)
+		{
+			try
+			{
+				var token = request.Headers["Authorization"];
+
+				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var scoreboard = await _playerService.GetScoreboard();
+
+				return new Response
+				{
+					StatusCode = HttpStatusCode.OK,
+					Content = JsonConvert.SerializeObject(scoreboard)
+				};
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Unauthorized,
+					Content = "Access token is missing or invalid"
+				};
 			}
 			catch (Exception ex)
 			{

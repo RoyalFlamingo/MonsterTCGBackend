@@ -135,5 +135,37 @@ namespace MonsterTCG.Business.Services
 
 			return true;
 		}
+
+		/// <summary>
+		/// Gets the player stats from the database
+		/// </summary>
+		/// <returns>stats or null if not found</returns>
+		public async Task<PlayerStats> GetStats(string token)
+		{
+			if (token == "")
+				throw new UnauthorizedAccessException();
+
+			var tokenPlayer = await _playerRepository.GetPlayer(token);
+
+			if (tokenPlayer == null)
+				throw new UnauthorizedAccessException();
+
+			return new PlayerStats()
+			{
+				Name = tokenPlayer.Name,
+				Elo = tokenPlayer.Elo,
+				Wins = tokenPlayer.Wins,
+				Losses = tokenPlayer.Losses
+			};
+		}
+
+		/// <summary>
+		/// Gets the player stats from the database
+		/// </summary>
+		/// <returns>stats or null if not found</returns>
+		public async Task<List<PlayerStats>> GetScoreboard()
+		{
+			return await _playerRepository.GetScoreboard();
+		}
 	}
 }
