@@ -1,10 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using System.Transactions;
 using System.Xml.Linq;
+using MonsterTCG.Business.Enums;
 using MonsterTCG.Business.Models;
 using Npgsql;
 
@@ -165,6 +168,89 @@ namespace MonsterTCG.Business.Database
 			return players;
 		}
 
+		public async Task<List<TradingDeal>> GetTradingDeals()
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+			List<TradingDeal> deals = new List<TradingDeal>();
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+
+				using (var command = new NpgsqlCommand("SELECT id, card_guid, type, mindamage FROM tradingdeals", connection))
+				{
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						while (await reader.ReadAsync())
+						{
+							TradingDeal deal = new TradingDeal();
+							deal.Id = reader.GetGuid(reader.GetOrdinal("id")).ToString();
+							deal.CardToTrade = reader.GetGuid(reader.GetOrdinal("card_guid")).ToString();
+							deal.Type = ParseCardType(reader.GetString(reader.GetOrdinal("type")));
+							deal.MinimumDamage = reader.GetInt32(reader.GetOrdinal("mindamage"));
+
+							deals.Add(deal);
+						}
+					}
+				}
+			}
+
+			return deals;
+		}
+
+		public async Task<bool> CreateTradingDeal(TradingDeal deal)
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+
+				var sql = "SELECT owner_id FROM stacks WHERE owner_id = @owner AND card_guid = @guid";
+				using (var command = new NpgsqlCommand(sql, connection))
+				{
+					command.Parameters.AddWithValue("@owner", deal.OwnerId);
+					command.Parameters.AddWithValue("@guid", Guid.Parse(deal.CardToTrade));
+
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						if (!await reader.ReadAsync()) // checks if a card was found
+						{
+							return false;
+						}
+					}
+				}
+
+				sql = "SELECT card_guid FROM decks WHERE card_guid = @card";
+				using (var command = new NpgsqlCommand(sql, connection))
+				{
+					command.Parameters.AddWithValue("@card", Guid.Parse(deal.CardToTrade));
+
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						if (await reader.ReadAsync()) // checks if a card was found
+						{
+							return false;
+						}
+					}
+				}
+
+				using (var command = new NpgsqlCommand("INSERT INTO tradingdeals (id, card_guid, type, owner_id, mindamage) VALUES (@id, @card, @type, @owner, @dmg)", connection))
+				{
+					command.Parameters.AddWithValue("@id", Guid.Parse(deal.Id));
+					command.Parameters.AddWithValue("@card", Guid.Parse(deal.CardToTrade));
+					command.Parameters.AddWithValue("@type", deal.Type.ToString());
+					command.Parameters.AddWithValue("@owner", deal.OwnerId);
+					command.Parameters.AddWithValue("@dmg", deal.MinimumDamage);
+
+					var result = await command.ExecuteNonQueryAsync();
+					return result > 0;
+				}
+			}
+
+		}
+
 		/// <summary>
 		/// Reads all player related data from the player table
 		/// </summary>
@@ -184,6 +270,11 @@ namespace MonsterTCG.Business.Database
 				Coins = reader.GetInt32(reader.GetOrdinal("coins")),
 				Token = reader.GetString(reader.GetOrdinal("token")),
 			};
+		}
+
+		private static CardType ParseCardType(string type)
+		{
+			return (CardType)Enum.Parse(typeof(CardType), type);
 		}
 	}
 }

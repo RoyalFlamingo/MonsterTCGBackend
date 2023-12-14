@@ -56,6 +56,25 @@ namespace MonsterTCG.Business.Database
 				{
 					try
 					{
+						//check if any card is in a trading deal
+						foreach (var cardId in cardIds)
+						{
+							sql = "SELECT card_guid FROM tradingdeals WHERE card_guid = @guid";
+							using (var command = new NpgsqlCommand(sql, connection, transaction))
+							{
+								command.Parameters.AddWithValue("@guid", Guid.Parse(cardId));
+
+								using (var reader = await command.ExecuteReaderAsync())
+								{
+									if (await reader.ReadAsync()) // checks if a card was found
+									{
+										await transaction.RollbackAsync();
+										return false;
+									}
+								}
+							}
+						}
+
 						//check if the provided cards belong to the player
 						foreach (var cardId in cardIds)
 						{

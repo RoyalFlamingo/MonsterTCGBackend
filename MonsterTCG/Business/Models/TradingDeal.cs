@@ -9,15 +9,15 @@ using System.Threading.Tasks;
 
 namespace MonsterTCG.Business.Models
 {
-	public class Card
+	public class TradingDeal
 	{
-		[Newtonsoft.Json.JsonIgnore]
-		public int Id { get; set; }
-		public string? Guid { get; set; }
-		public string? Name { get; set; }
+		public string? Id { get; set; }
+		public string? CardToTrade { get; set; }
 		public CardType Type { get; set; }
-		public CardElement Element { get; set; }
-		public int Damage { get; set; }
+		public int MinimumDamage { get; set; }
+
+		[Newtonsoft.Json.JsonIgnore]
+		public int OwnerId { get; set; }
 
 	}
 }

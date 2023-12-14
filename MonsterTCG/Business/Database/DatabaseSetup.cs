@@ -58,6 +58,16 @@ namespace MonsterTCG.Business.Database
 					"damage INT)", conn);
 				createCardTableCmd.ExecuteNonQuery();
 
+				// CREATE TABLE CARD
+				var createTradingDealsTableCmd = new NpgsqlCommand(
+					"CREATE TABLE IF NOT EXISTS tradingdeals (" +
+					"id UUID PRIMARY KEY, " +
+					"card_guid UUID UNIQUE, " +
+					"type VARCHAR(50), " +
+					"owner_id INT REFERENCES players(id), " +
+					"mindamage INT)", conn);
+				createTradingDealsTableCmd.ExecuteNonQuery();
+
 
 
 			}
