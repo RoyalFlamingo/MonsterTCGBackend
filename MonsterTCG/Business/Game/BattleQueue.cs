@@ -44,5 +44,7 @@ public class BattleQueue
 	private void BattleLogic(GamePlayer player1, GamePlayer player2)
 	{
 		Console.WriteLine("Battle between " + player1.Player.Name + " and " + player2.Player.Name + " started!");
+
+
 	}
 }

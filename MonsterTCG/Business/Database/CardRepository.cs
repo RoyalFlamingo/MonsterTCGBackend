@@ -26,7 +26,6 @@ namespace MonsterTCG.Business.Database
 						var sql = "INSERT INTO cards (guid, name, type, element, damage) VALUES (@guid, @name, @type, @element, @damage)";
 						using (var command = new NpgsqlCommand(sql, connection, transaction))
 						{
-							// Fügen Sie die Parameter entsprechend der Eigenschaften Ihrer Card-Klasse hinzu
 							command.Parameters.AddWithValue("@guid", Guid.Parse(card.Guid));
 							command.Parameters.AddWithValue("@name", card.Name);
 							command.Parameters.AddWithValue("@type", card.Type.ToString());
@@ -234,6 +233,31 @@ namespace MonsterTCG.Business.Database
 			}
 
 			return cards;
+		}
+
+		public async Task<Card> GetCard(string cardGuid)
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+
+				using (var command = new NpgsqlCommand("SELECT guid, name, type, element, damage FROM cards c WHERE guid = @guid", connection))
+				{
+					command.Parameters.AddWithValue("@guid", Guid.Parse(cardGuid));
+
+					using (var reader = await command.ExecuteReaderAsync())
+					{
+						if(await reader.ReadAsync())
+						{
+							Card card = ReadCardColumns(reader);
+							return card;
+						}
+						return null; //no card with given id was found
+					}
+				}
+			}
 		}
 
 		private static Card ReadCardColumns(NpgsqlDataReader reader)

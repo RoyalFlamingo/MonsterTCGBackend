@@ -120,5 +120,93 @@ namespace MonsterTCG.Controllers
 			}
 		}
 
+		[Route("DELETE", "/tradings/{tradingdealid}")]
+		public async Task<Response> DeleteTradingDeal(Request request, string tradingdealid)
+		{
+			try
+			{
+				var token = request.Headers["Authorization"];
+
+				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				if (!await _tradingService.DeleteTradingDeal(token, tradingdealid))
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.NotFound,
+						Content = "The provided deal ID was not found or the player did not create this deal."
+					};
+				}
+
+				return new Response
+				{
+					StatusCode = HttpStatusCode.OK,
+					Content = "Trading deal successfully deleted"
+				};
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Unauthorized,
+					Content = "Access token is missing or invalid"
+				};
+			}
+			catch (Exception ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Content = $"The server responded with following error: {ex.Message}"
+				};
+			}
+		}
+
+		[Route("POST", "/tradings/{tradingdealid}")]
+		public async Task<Response> Trade(Request request, string tradingdealid)
+		{
+			try
+			{
+				var token = request.Headers["Authorization"];
+
+				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var requestData = JsonConvert.DeserializeObject<string>(request.Body);
+
+				if (!await _tradingService.Trade(token, tradingdealid, requestData))
+				{
+					return new Response
+					{
+						StatusCode = HttpStatusCode.NotFound,
+						Content = "The provided deal ID was not found or the player did not create this deal."
+					};
+				}
+
+				return new Response
+				{
+					StatusCode = HttpStatusCode.OK,
+					Content = "Trading deal successfully deleted"
+				};
+			}
+			catch (UnauthorizedAccessException)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.Unauthorized,
+					Content = "Access token is missing or invalid"
+				};
+			}
+			catch (Exception ex)
+			{
+				return new Response
+				{
+					StatusCode = HttpStatusCode.BadRequest,
+					Content = $"The server responded with following error: {ex.Message}"
+				};
+			}
+		}
+
 	}
 }

@@ -251,6 +251,119 @@ namespace MonsterTCG.Business.Database
 
 		}
 
+		public async Task<bool> DeleteTradingDeal(string dealId)
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+
+				using (var command = new NpgsqlCommand("DELETE FROM tradingdeals WHERE id = @dealid", connection))
+				{
+					command.Parameters.AddWithValue("@dealid", Guid.Parse(dealId));
+
+					var result = await command.ExecuteNonQueryAsync();
+					return result > 0;
+				}
+			}
+
+		}
+
+		public async Task<bool> Trade(Card cardTradeDeal, Card offeredCard, int traderPlayerId, int offeringPlayerId, string tradeId)
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+				using (var transaction = connection.BeginTransaction())
+				{
+					var sql = "DELETE FROM tradingdeals WHERE id = @trade";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@trade", Guid.Parse(tradeId));
+
+						if(await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return false;
+						}
+					}
+
+					sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(cardTradeDeal.Guid));
+						command.Parameters.AddWithValue("@newowner", offeringPlayerId);
+
+						if (await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return false;
+						}
+					}
+
+					sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(offeredCard.Guid));
+						command.Parameters.AddWithValue("@newowner", traderPlayerId);
+
+						if (await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return false;
+						}
+					}
+
+					await transaction.CommitAsync();
+					return true;
+				}
+			}
+		}
+
+		public async Task<bool> ChangeCardOwnership(Card card1, Card card2, int playerId1, int playerId2)
+		{
+			string connectionString = ConfigurationManager.ConnectionString;
+
+			using (var connection = new NpgsqlConnection(connectionString))
+			{
+				await connection.OpenAsync();
+				using (var transaction = connection.BeginTransaction())
+				{
+					var sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card1.Guid));
+						command.Parameters.AddWithValue("@newowner", playerId2);
+
+						if (await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return false;
+						}
+					}
+
+					sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card2.Guid));
+						command.Parameters.AddWithValue("@newowner", playerId1);
+
+						if (await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return false;
+						}
+					}
+
+					await transaction.CommitAsync();
+					return true;
+				}
+			}
+		}
+
 		/// <summary>
 		/// Reads all player related data from the player table
 		/// </summary>
