@@ -161,7 +161,8 @@ public class BattleQueue
 	private void WriteLog(List<string> log)
 	{
 		string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
-		string fileName = $"BattleLog_{DateTime.Now:yyyyMMddHHmmss}.txt";
+		var random = new Random();
+		string fileName = $"BattleLog_{DateTime.Now:yyyyMMddHHmmss}_{random.Next(1000, 9999)}.txt";
 		string filePath = Path.Combine(logDirectory, fileName);
 
 		File.WriteAllLines(filePath, log);
