@@ -323,7 +323,7 @@ namespace MonsterTCG.Business.Database
 			}
 		}
 
-		public async Task<bool> ChangeCardOwnership(Card card1, Card card2, int playerId1, int playerId2)
+		public async Task ChangeCardOwnership(Card card, int newOwner)
 		{
 			string connectionString = ConfigurationManager.ConnectionString;
 
@@ -335,31 +335,18 @@ namespace MonsterTCG.Business.Database
 					var sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
 					using (var command = new NpgsqlCommand(sql, connection, transaction))
 					{
-						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card1.Guid));
-						command.Parameters.AddWithValue("@newowner", playerId2);
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card.Guid));
+						command.Parameters.AddWithValue("@newowner", newOwner);
 
 						if (await command.ExecuteNonQueryAsync() == 0)
 						{
 							await transaction.RollbackAsync();
-							return false;
-						}
-					}
-
-					sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
-					using (var command = new NpgsqlCommand(sql, connection, transaction))
-					{
-						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card2.Guid));
-						command.Parameters.AddWithValue("@newowner", playerId1);
-
-						if (await command.ExecuteNonQueryAsync() == 0)
-						{
-							await transaction.RollbackAsync();
-							return false;
+							return;
 						}
 					}
 
 					await transaction.CommitAsync();
-					return true;
+					return;
 				}
 			}
 		}
