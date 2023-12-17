@@ -13,6 +13,8 @@ namespace MonsterTCG.Business.Enums
 	{
 		Normal,
 		Fire,
-		Water
+		Water,
+		Wind,
+		Thunder
 	}
 }

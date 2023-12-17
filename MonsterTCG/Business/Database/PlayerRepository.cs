@@ -10,6 +10,7 @@ using System.Xml.Linq;
 using MonsterTCG.Business.Enums;
 using MonsterTCG.Business.Models;
 using Npgsql;
+using MonsterTCG.Config;
 
 namespace MonsterTCG.Business.Database
 {
@@ -158,7 +159,7 @@ namespace MonsterTCG.Business.Database
 							playerStats.Elo = reader.GetInt32(reader.GetOrdinal("elo"));
 							playerStats.Wins = reader.GetInt32(reader.GetOrdinal("wins"));
 							playerStats.Losses = reader.GetInt32(reader.GetOrdinal("losses"));
-
+							playerStats.CalculateWinRate();
 							players.Add(playerStats);
 						}
 					}
@@ -332,7 +333,20 @@ namespace MonsterTCG.Business.Database
 				await connection.OpenAsync();
 				using (var transaction = connection.BeginTransaction())
 				{
-					var sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					var sql = "UPDATE decks SET owner_id = @newowner WHERE card_guid = @cardguid";
+					using (var command = new NpgsqlCommand(sql, connection, transaction))
+					{
+						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card.Guid));
+						command.Parameters.AddWithValue("@newowner", newOwner);
+
+						if (await command.ExecuteNonQueryAsync() == 0)
+						{
+							await transaction.RollbackAsync();
+							return;
+						}
+					}
+
+					sql = "UPDATE stacks SET owner_id = @newowner WHERE card_guid = @cardguid";
 					using (var command = new NpgsqlCommand(sql, connection, transaction))
 					{
 						command.Parameters.AddWithValue("@cardguid", Guid.Parse(card.Guid));

@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -22,7 +23,13 @@ namespace MonsterTCG.Business.Services
 
 		public string GenerateToken(string playername)
 		{
-			return $"Bearer {playername}-mtcgToken";
+			if(ConfigurationManager.UseFakeTokens) //fake tokens for integration tests
+				return $"Bearer {playername}-mtcgToken";
+
+			//use random number generator to generate a save random token
+			var randomBytes = new byte[32];
+			RandomNumberGenerator.Fill(randomBytes);
+			return Convert.ToBase64String(randomBytes);
 		}
 
 		/// <summary>
@@ -153,13 +160,16 @@ namespace MonsterTCG.Business.Services
 			if (tokenPlayer == null)
 				throw new UnauthorizedAccessException();
 
-			return new PlayerStats()
+			var statsPlayer = new PlayerStats()
 			{
 				Name = tokenPlayer.Name,
 				Elo = tokenPlayer.Elo,
 				Wins = tokenPlayer.Wins,
 				Losses = tokenPlayer.Losses
 			};
+			statsPlayer.CalculateWinRate();
+
+			return statsPlayer;
 		}
 
 		/// <summary>
@@ -183,7 +193,7 @@ namespace MonsterTCG.Business.Services
 		/// Enters the battle queue and waits for an opponent
 		/// </summary>
 		/// <returns>true if the battle has been carried out</returns>
-		public async Task<bool> Battle(string token)
+		public async Task<List<string>> Battle(string token)
 		{
 			if (token == "")
 				throw new UnauthorizedAccessException();
@@ -201,7 +211,7 @@ namespace MonsterTCG.Business.Services
 
 			var battleQueue = BattleQueue.GetInstance();
 
-			return battleQueue.EnterBattle(new GamePlayer(tokenPlayer, playerDeck, playerStack)); //only returns true if at least 2 players were in the queue
+			return await battleQueue.EnterBattle(new GamePlayer(tokenPlayer, playerDeck, playerStack)); //only returns true if at least 2 players were in the queue
 		}
 	}
 }

@@ -297,12 +297,14 @@ namespace MonsterTCG.Controllers
 				if (token == null)
 					throw new UnauthorizedAccessException();
 
-				if (await _playerService.Battle(token))
+				var battleResult = await _playerService.Battle(token);
+
+				if (battleResult!=null) //battle happened
 				{
 					return new Response
 					{
 						StatusCode = HttpStatusCode.OK,
-						Content = "The battle has been carried out successfully."
+						Content = JsonConvert.SerializeObject(battleResult)
 					};
 				}
 				else

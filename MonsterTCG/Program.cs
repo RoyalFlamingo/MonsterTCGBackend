@@ -1,5 +1,6 @@
 ﻿using MonsterTCG.Business.Database;
 using MonsterTCG.Http;
+using MonsterTCG.Config;
 
 namespace MonsterTCG
 {
@@ -14,7 +15,7 @@ namespace MonsterTCG
 			}
 			catch (Exception)
 			{
-				Console.WriteLine("Error setting up the server, closing...");
+				Console.WriteLine("Error loading configuration or connecting to the database, closing...");
 				return;
 			}
 
