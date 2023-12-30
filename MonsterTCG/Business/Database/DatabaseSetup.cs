@@ -70,7 +70,11 @@ namespace MonsterTCG.Business.Database
 				createTradingDealsTableCmd.ExecuteNonQuery();
 
 
-
+				// CREATE TABLE MIGRATIONS
+				var createMigrationsTableCmd = new NpgsqlCommand(
+					"CREATE TABLE IF NOT EXISTS migrations (" +
+					"id UUID PRIMARY KEY", conn);
+				createMigrationsTableCmd.ExecuteNonQuery();
 			}
 		}
     }

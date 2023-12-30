@@ -9,11 +9,11 @@ namespace MonsterTCG.Http
 {
 	class Router
 	{
-		//Calls method for given route
+		//Calls method for given route, methods are found in the controllers
 		public async Task<Response> RouteRequestAsync(Request request)
 		{
 			var controllerTypes = Assembly.GetExecutingAssembly().GetTypes()
-				.Where(type => type.Name.EndsWith("Controller"));
+				.Where(type => type.Name.EndsWith("Controller")); //check all classes ending with Controller
 
 			foreach (var controllerType in controllerTypes)
 			{

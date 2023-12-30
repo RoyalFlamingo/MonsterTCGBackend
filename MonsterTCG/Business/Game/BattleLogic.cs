@@ -52,16 +52,20 @@ public class BattleLogic
 			if (damage1 > damage2)
 			{
 				// player 1 wins the round
-				await _playerRepository.ChangeCardOwnership(card2, player1.Player.Id);
+
+				//await _playerRepository.ChangeCardOwnership(card2, player1.Player.Id); // old card change ownership
 				player2.Deck.Remove(card2);
+				player1.Deck.Add(card2);
 				player1.Points++;
 				battleLog.Add($"Player 1 wins round {round + 1} with {damage1} damage VS {damage2} damage. Player 1 won the card {card2.Name}!");
 			}
 			else if (damage2 > damage1)
 			{
 				// player 2 wins the round
-				await _playerRepository.ChangeCardOwnership(card1, player2.Player.Id);
+
+				//await _playerRepository.ChangeCardOwnership(card1, player2.Player.Id); // old card change ownership
 				player1.Deck.Remove(card1);
+				player2.Deck.Add(card1);
 				player2.Points++;
 				battleLog.Add($"Player 2 wins round {round + 1} with {damage2} damage VS {damage1} damage. Player 2 won the card {card1.Name}!");
 			}
