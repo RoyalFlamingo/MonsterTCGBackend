@@ -1,5 +1,6 @@
 ﻿using MonsterTCG.Business.Database;
 using MonsterTCG.Business.Models;
+using MonsterTCG.Config;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using MonsterTCG.Business.Enums;
 using MonsterTCG.Business.Models;
+using MonsterTCG.Config;
 using Npgsql;
 
 namespace MonsterTCG.Business.Database

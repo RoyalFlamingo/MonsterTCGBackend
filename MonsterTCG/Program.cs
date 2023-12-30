@@ -11,11 +11,20 @@ namespace MonsterTCG
 			try
 			{
 				ConfigurationManager.LoadConfiguration();
-				DatabaseSetup dbSetup = new DatabaseSetup();
+
+				if (ConfigurationManager.DeleteTablesOnStartup)
+				{
+					Console.WriteLine("Do you want to delete all tables? (y/n): ");
+					if (Console.ReadKey().KeyChar != 'Y')
+						DatabaseSetup.DeleteTables();
+				}
+
+				DatabaseSetup.CreateTables();
 			}
-			catch (Exception)
+			catch (Exception ex)
 			{
-				Console.WriteLine("Error loading configuration or connecting to the database, closing...");
+				Console.WriteLine("Error loading configuration or connecting to the database:");
+				Console.WriteLine(ex.ToString());
 				return;
 			}
 

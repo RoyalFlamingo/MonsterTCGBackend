@@ -8,8 +8,9 @@ namespace MonsterTCG.Config
 		public static string ConnectionString { get; private set; }
 		public static bool UseFakeTokens { get; private set; }
 		public static int EloKFactor { get; private set; }
+		public static bool DeleteTablesOnStartup { get; private set; }
 
-        public static void LoadConfiguration()
+		public static void LoadConfiguration()
 		{
 			var builder = new ConfigurationBuilder();
 			builder.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -18,6 +19,7 @@ namespace MonsterTCG.Config
 			ConnectionString = configuration.GetConnectionString("DefaultConnection");
 			UseFakeTokens = configuration.GetValue<bool>("Settings:UseFakeTokens");
 			EloKFactor = configuration.GetValue<int>("Settings:EloKFactor");
+			DeleteTablesOnStartup = configuration.GetValue<bool>("Settings:DeleteTablesOnStartup");
 		}
 	}
 }

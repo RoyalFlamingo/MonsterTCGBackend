@@ -8,9 +8,43 @@ using MonsterTCG.Config;
 
 namespace MonsterTCG.Business.Database
 {
-	class DatabaseSetup
+	static class DatabaseSetup
 	{
-        public DatabaseSetup()
+		public static void DeleteTables()
+		{
+			using (var conn = new NpgsqlConnection(ConfigurationManager.ConnectionString))
+			{
+				conn.Open();
+
+				// DROP TABLE tradingdeals
+				var dropTradingDealsTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS tradingdeals", conn);
+				dropTradingDealsTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table tradingdeals");
+
+				// DROP TABLE cards
+				var dropCardsTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS cards", conn);
+				dropCardsTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table cards");
+
+				// DROP TABLE decks
+				var dropDecksTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS decks", conn);
+				dropDecksTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table decks");
+
+				// DROP TABLE stacks
+				var dropStacksTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS stacks", conn);
+				dropStacksTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table stacks");
+
+				// DROP TABLE players
+				var dropPlayersTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS players", conn);
+				dropPlayersTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table players");
+				Console.WriteLine();
+			}
+		}
+
+		public static void CreateTables()
         {
 			using (var conn = new NpgsqlConnection(ConfigurationManager.ConnectionString))
 			{
