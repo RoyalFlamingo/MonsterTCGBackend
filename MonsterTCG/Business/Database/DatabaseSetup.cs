@@ -40,6 +40,12 @@ namespace MonsterTCG.Business.Database
 				var dropPlayersTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS players", conn);
 				dropPlayersTableCmd.ExecuteNonQuery();
 				Console.WriteLine("Deleted table players");
+
+				// DROP TABLE migrations
+				var dropMigrationsTableCmd = new NpgsqlCommand("DROP TABLE IF EXISTS migrations", conn);
+				dropMigrationsTableCmd.ExecuteNonQuery();
+				Console.WriteLine("Deleted table migrations");
+
 				Console.WriteLine();
 			}
 		}
@@ -93,7 +99,7 @@ namespace MonsterTCG.Business.Database
 					"damage INT)", conn);
 				createCardTableCmd.ExecuteNonQuery();
 
-				// CREATE TABLE CARD
+				// CREATE TABLE TRADINGDEALS
 				var createTradingDealsTableCmd = new NpgsqlCommand(
 					"CREATE TABLE IF NOT EXISTS tradingdeals (" +
 					"id UUID PRIMARY KEY, " +
@@ -103,11 +109,10 @@ namespace MonsterTCG.Business.Database
 					"mindamage INT)", conn);
 				createTradingDealsTableCmd.ExecuteNonQuery();
 
-
 				// CREATE TABLE MIGRATIONS
 				var createMigrationsTableCmd = new NpgsqlCommand(
 					"CREATE TABLE IF NOT EXISTS migrations (" +
-					"id UUID PRIMARY KEY", conn);
+					"id INT PRIMARY KEY)", conn);
 				createMigrationsTableCmd.ExecuteNonQuery();
 			}
 		}

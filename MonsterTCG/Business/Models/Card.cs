@@ -18,6 +18,7 @@ namespace MonsterTCG.Business.Models
 		public CardType Type { get; set; }
 		public CardElement Element { get; set; }
 		public int Damage { get; set; }
+		public double CritChance { get; set; }
 
 	}
 }

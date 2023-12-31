@@ -42,6 +42,8 @@ public class BattleLogic
 
 			var damage1 = AdjustDamageForSpecialRule(card1, card2, battleLog);
 			var damage2 = AdjustDamageForSpecialRule(card2, card1, battleLog);
+			damage1 = AdjustDamageForCrit(damage1, card1, battleLog);
+			damage2 = AdjustDamageForCrit(damage2, card2, battleLog);
 
 			if (card1.Type == CardType.Spell || card2.Type == CardType.Spell)
 			{
@@ -146,6 +148,17 @@ public class BattleLogic
 		}
 
 		return damage * 0.5; //in all other cases, the attacking element is weaker
+	}
+
+	private double AdjustDamageForCrit(double damage, Card card, List<string> log)
+	{
+		var random = new Random();
+		if(random.NextDouble() < card.CritChance)
+		{
+			log.Add("Critical hit! Damage is doubled!");
+			return damage * 2;
+		}
+		return damage;
 	}
 
 	private double AdjustDamageForSpecialRule(Card dealer, Card taker, List<string> log)

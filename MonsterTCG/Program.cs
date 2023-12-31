@@ -1,6 +1,9 @@
 ﻿using MonsterTCG.Business.Database;
 using MonsterTCG.Http;
 using MonsterTCG.Config;
+using System.Reflection;
+using MonsterTCG.Business.Migrations;
+using Npgsql;
 
 namespace MonsterTCG
 {
@@ -20,6 +23,8 @@ namespace MonsterTCG
 				}
 
 				DatabaseSetup.CreateTables();
+
+				RunMigrations();
 			}
 			catch (Exception ex)
 			{
@@ -41,5 +46,62 @@ namespace MonsterTCG
 			server.Stop();
 			await serverTask;
 		}
+
+
+		private static void RunMigrations()
+		{
+			var migrations = Assembly.GetExecutingAssembly().GetTypes()
+				.Where(t => t.IsClass && t.Namespace == "MonsterTCG.Business.Migrations"
+							&& typeof(IMigration).IsAssignableFrom(t)); // Check if it implements IMigration
+
+			foreach (var migrationType in migrations)
+			{
+				var migrationInstance = Activator.CreateInstance(migrationType) as IMigration;
+				if (migrationInstance == null)
+					continue;
+
+				int version = migrationInstance.Version;
+				try
+				{
+					using (var conn = new NpgsqlConnection(ConfigurationManager.ConnectionString))
+					{
+						conn.Open();
+
+						var cmd = new NpgsqlCommand("SELECT id FROM migrations WHERE id = @id", conn);
+						cmd.Parameters.AddWithValue("@id", version);
+						using (var reader = cmd.ExecuteReader())
+						{
+							if (reader.Read())
+							{
+								Console.WriteLine($"Migration {version} skipped.");
+								continue;
+							}
+						}
+					}
+
+					var method = migrationType.GetMethod("Up");
+					if (method != null)
+					{
+						Console.WriteLine($"Executing migration: {migrationType.Name}");
+						method.Invoke(migrationInstance, null);
+					}
+
+					using (var conn = new NpgsqlConnection(ConfigurationManager.ConnectionString))
+					{
+						conn.Open();
+
+						var cmd = new NpgsqlCommand("INSERT INTO migrations (id) VALUES (@id)", conn);
+						cmd.Parameters.AddWithValue("@id", version);
+						cmd.ExecuteNonQuery();
+					}
+
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine($"Migration error: {ex.Message}");
+				}
+			}
+		}
 	}
 }
+
