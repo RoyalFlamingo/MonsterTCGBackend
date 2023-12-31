@@ -10,7 +10,7 @@ namespace MonsterTCG.Http
 		public string Method { get; set; }
 		public string Path { get; set; }
 		public string Version { get; set; }
-		public Dictionary<string, string> Headers { get; private set; }
+		public Dictionary<string, string> Headers { get; set; }
 		public string Body { get; set; }
 
 		public Request()

@@ -28,7 +28,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if(token == null)
 				{
@@ -92,7 +92,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 				{

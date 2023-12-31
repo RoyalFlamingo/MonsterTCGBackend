@@ -65,7 +65,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 					throw new UnauthorizedAccessException();
@@ -118,7 +118,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 					throw new UnauthorizedAccessException();
@@ -205,7 +205,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 					throw new UnauthorizedAccessException();
@@ -255,7 +255,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 					throw new UnauthorizedAccessException();
@@ -292,7 +292,7 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
 					throw new UnauthorizedAccessException();

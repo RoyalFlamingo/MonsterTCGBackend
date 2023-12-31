@@ -8,6 +8,7 @@ using MonsterTCG.Business.Models;
 using Npgsql;
 using Newtonsoft.Json;
 using System.Numerics;
+using MonsterTCG.Business.Database;
 
 
 
@@ -15,10 +16,12 @@ namespace MonsterTCG.Controllers
 {
 	public class CardController
 	{
+		private readonly PlayerRepository _playerRepository;
 		private readonly CardService _cardService;
 		public CardController()
 		{
 			_cardService = new CardService();
+			_playerRepository = new PlayerRepository();
 		}
 
 		/// <summary>
@@ -29,9 +32,13 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var tokenPlayer = await _playerRepository.GetPlayer(token);
+				if (tokenPlayer == null)
 					throw new UnauthorizedAccessException();
 
 				var stack = await _cardService.GetStack(token);
@@ -79,9 +86,13 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var tokenPlayer = await _playerRepository.GetPlayer(token);
+				if (tokenPlayer == null)
 					throw new UnauthorizedAccessException();
 
 				var stack = await _cardService.GetDeck(token);
@@ -129,9 +140,13 @@ namespace MonsterTCG.Controllers
 		{
 			try
 			{
-				var token = request.Headers["Authorization"];
+				request.Headers.TryGetValue("Authorization", out var token);
 
 				if (token == null)
+					throw new UnauthorizedAccessException();
+
+				var tokenPlayer = await _playerRepository.GetPlayer(token);
+				if (tokenPlayer == null)
 					throw new UnauthorizedAccessException();
 
 				var cardIds = JsonConvert.DeserializeObject<IEnumerable<string>>(request.Body);

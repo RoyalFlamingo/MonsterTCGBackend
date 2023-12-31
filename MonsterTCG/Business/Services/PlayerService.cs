@@ -212,7 +212,8 @@ namespace MonsterTCG.Business.Services
 
 			var battleQueue = BattleQueue.GetInstance();
 
-			return await battleQueue.EnterBattle(new GamePlayer(tokenPlayer, playerDeck, playerStack)); //only returns true if at least 2 players were in the queue
+			return await battleQueue.EnterBattle(new GamePlayer(tokenPlayer, playerDeck)); //only returns true if at least 2 players were in the queue
 		}
 	}
+
 }

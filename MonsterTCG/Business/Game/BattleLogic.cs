@@ -21,6 +21,7 @@ public class BattleLogic
 		List<string> battleLog = new List<string>();
 
 		Console.WriteLine("Battle between " + player1.Player.Name + " and " + player2.Player.Name + " started!");
+		battleLog.Add($"Battle between {player1.Player.Name} and {player2.Player.Name} started!");
 
 		const int maxRounds = 100;
 
@@ -111,12 +112,12 @@ public class BattleLogic
 		return battleLog;
 	}
 
-	private Card ChooseRandomCard(List<Card> deck, Random random)
+	internal Card ChooseRandomCard(List<Card> deck, Random random)
 	{
 		int index = random.Next(deck.Count);
 		return deck[index];
 	}
-	private double AdjustDamageForElement(CardElement attackerElement, CardElement defenderElement, double damage)
+	internal double AdjustDamageForElement(CardElement attackerElement, CardElement defenderElement, double damage)
 	{
 		if (attackerElement == defenderElement)
 		{
@@ -150,7 +151,7 @@ public class BattleLogic
 		return damage * 0.5; //in all other cases, the attacking element is weaker
 	}
 
-	private double AdjustDamageForCrit(double damage, Card card, List<string> log)
+	internal double AdjustDamageForCrit(double damage, Card card, List<string> log)
 	{
 		var random = new Random();
 		if(random.NextDouble() < card.CritChance)
@@ -161,7 +162,7 @@ public class BattleLogic
 		return damage;
 	}
 
-	private double AdjustDamageForSpecialRule(Card dealer, Card taker, List<string> log)
+	internal double AdjustDamageForSpecialRule(Card dealer, Card taker, List<string> log)
 	{
 		if (dealer.Name == "Goblin" && taker.Name == "Dragon")
 		{
@@ -192,7 +193,7 @@ public class BattleLogic
 		return dealer.Damage;
 	}
 
-	private void WriteLogFile(List<string> log)
+	internal void WriteLogFile(List<string> log)
 	{
 		string logDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "logs");
 
@@ -208,7 +209,7 @@ public class BattleLogic
 		File.WriteAllLines(filePath, log);
 	}
 
-	private async Task<int> CalculateAndWriteElo(GamePlayer winner, GamePlayer loser)
+	internal async Task<int> CalculateAndWriteElo(GamePlayer winner, GamePlayer loser)
 	{
 		var eloChange = ConfigurationManager.EloKFactor * ((1 - (1 / (1 + Math.Pow(10, (loser.Player.Elo - winner.Player.Elo) / 400.0d)))));
 		var roundedEloChange = Convert.ToInt32(eloChange);

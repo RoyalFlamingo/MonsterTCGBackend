@@ -10,7 +10,7 @@ namespace MonsterTCG.Http
 	{
 		private TcpClient socket;
 		private Server httpServer;
-		private Request req;
+		public Request req;
 
 		public RequestHandler(TcpClient s, Server httpServer)
 		{
@@ -24,7 +24,7 @@ namespace MonsterTCG.Http
 			using var writer = new StreamWriter(socket.GetStream()) { AutoFlush = true };
 			using var reader = new StreamReader(socket.GetStream());
 
-			// Lesen der Anfrage
+			// read request line
 			string line;
 			while ((line = await reader.ReadLineAsync()) != null)
 			{
@@ -47,11 +47,11 @@ namespace MonsterTCG.Http
 			Router router = new Router();
 			Response res = await router.RouteRequestAsync(req);
 
-			// Senden der Antwort
+			// send reponse
 			await res.SendResponseAsync(writer);
 		}
 
-		private void ProcessLine(string line)
+		public void ProcessLine(string line)
 		{
 			if (req.Method == null)
 			{

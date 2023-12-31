@@ -6,7 +6,7 @@ namespace MonsterTCG.Config
 	public static class ConfigurationManager
 	{
 		public static string ConnectionString { get; private set; }
-		public static bool UseFakeTokens { get; private set; }
+		public static bool UseFakeTokens { get; set; }
 		public static int EloKFactor { get; private set; }
 		public static bool DeleteTablesOnStartup { get; private set; }
 
