@@ -24,7 +24,7 @@ namespace MonsterTCG.Business.Database
 				{
 					foreach (var card in cards)
 					{
-						var sql = "INSERT INTO cards (guid, name, type, element, damage) VALUES (@guid, @name, @type, @element, @damage)";
+						var sql = "INSERT INTO cards (guid, name, type, element, damage, description) VALUES (@guid, @name, @type, @element, @damage, @desc)";
 						using (var command = new NpgsqlCommand(sql, connection, transaction))
 						{
 							command.Parameters.AddWithValue("@guid", Guid.Parse(card.Guid));
@@ -32,6 +32,7 @@ namespace MonsterTCG.Business.Database
 							command.Parameters.AddWithValue("@type", card.Type.ToString());
 							command.Parameters.AddWithValue("@element", card.Element.ToString());
 							command.Parameters.AddWithValue("@damage", card.Damage);
+							command.Parameters.AddWithValue("@desc", card.Description);
 
 							await command.ExecuteNonQueryAsync();
 						}
@@ -191,7 +192,7 @@ namespace MonsterTCG.Business.Database
 			{
 				await connection.OpenAsync();
 
-				using (var command = new NpgsqlCommand("SELECT c.guid, c.name, c.type, c.element, c.damage FROM stacks JOIN cards c ON card_guid = c.guid WHERE owner_id = @owner", connection))
+				using (var command = new NpgsqlCommand("SELECT c.guid, c.name, c.type, c.element, c.damage, c.description FROM stacks JOIN cards c ON card_guid = c.guid WHERE owner_id = @owner", connection))
 				{
 					command.Parameters.AddWithValue("@owner", playerid);
 
@@ -218,7 +219,7 @@ namespace MonsterTCG.Business.Database
 			{
 				await connection.OpenAsync();
 
-				using (var command = new NpgsqlCommand("SELECT c.guid, c.name, c.type, c.element, c.damage FROM decks JOIN cards c ON card_guid = c.guid WHERE owner_id = @owner", connection))
+				using (var command = new NpgsqlCommand("SELECT c.guid, c.name, c.type, c.element, c.damage, c.description FROM decks JOIN cards c ON card_guid = c.guid WHERE owner_id = @owner", connection))
 				{
 					command.Parameters.AddWithValue("@owner", playerid);
 
@@ -244,7 +245,7 @@ namespace MonsterTCG.Business.Database
 			{
 				await connection.OpenAsync();
 
-				using (var command = new NpgsqlCommand("SELECT guid, name, type, element, damage FROM cards c WHERE guid = @guid", connection))
+				using (var command = new NpgsqlCommand("SELECT guid, name, type, element, damage, description FROM cards c WHERE guid = @guid", connection))
 				{
 					command.Parameters.AddWithValue("@guid", Guid.Parse(cardGuid));
 
@@ -269,7 +270,8 @@ namespace MonsterTCG.Business.Database
 				Name = reader.IsDBNull(reader.GetOrdinal("name")) ? null : reader.GetString(reader.GetOrdinal("name")),
 				Type = ParseCardType(reader.GetString(reader.GetOrdinal("type"))),
 				Element = ParseCardElement(reader.GetString(reader.GetOrdinal("element"))),
-				Damage = reader.GetInt32(reader.GetOrdinal("damage"))
+				Damage = reader.GetInt32(reader.GetOrdinal("damage")),
+				Description = reader.IsDBNull(reader.GetOrdinal("description")) ? null : reader.GetString(reader.GetOrdinal("description"))
 			};
 		}
 
