@@ -1,0 +1,76 @@
+GIT repo: https://github.com/RoyalFlamingo/MonsterTCGBackend
+
+---
+
+Technical Steps
+
+1. Design and Implementation
+
+Developed a basic architecture for the Monster Trading Card Game (MonsterTCG), including core classes like BattleLogic, PlayerService, and CardController.
+Implemented key logics, including battle mechanics, player registration and authentication, and card management.
+The code architecture is inspired by ASP.NET, but simplified, as there are no separate projects or dependency injection.
+
+2. Challenges
+
+I encountered difficulties in creating unit tests for classes with a direct database dependencies and/or network operations.
+Faced complexities with the singleton class BattleQueue and the asynchronous nature of requests.
+
+3. Solutions
+
+For the unit tests, I decided to focus on tests that did not require direct database operations.
+I separated the queue and battle logic. The second battle request gets the full log sent in the content.
+
+4. Lessions learned
+
+*) Interfaces can help with unit tests, as you can swap out real database/network operations with mock objects.
+*) Creating database setup and migration logic can greatly help development.
+
+---
+
+1. Selection of Unit Tests
+
+I focused on tests that verify the core functionality of the battle without extensive mocking.
+For the services, I created tests for the GenerateToken method in PlayerService, as it plays a critical role in player authentication and can be easily tested in isolation.
+Error handling tests in CardController to ensure the stability of the API endpoints.
+
+2. Why is the Tested Code Critical?
+
+The unit tests test important areas of the application, such as security (token generation) and user interaction (card management), as errors in these areas could lead to security vulnerabilities or a poor user experience.
+
+---
+
+Optional features added
+
+1. Additional element types: Wind, Thunder
+2. Card Description
+3. Proper ELO calculation
+4. W/L ratio
+
+Unique featue(s)
+
+1. Critical Chance: A card has a property "Critical Chance", which grants a card the chance to deal double damage.
+2. Migrations: A basic system to easily allow new database migrations to be added
+
+---
+
+Time Tracking
+
+Initial Project Setup: 4 hours
+Setting up project folder structure, basic classes (like Server), and configuration.
+
+Designing Core Game Mechanics: 4 hours
+Developing the rules and interactions for BattleLogic.
+
+Implementing servies: 6 hours
+Coding the various service classes (like registration, login, and token generation).
+
+API Endpoints: 10 hours
+Creating endpoints/controllers for the required API operations.
+
+Unit Test Development: 3 hours
+Designing and implementing unit tests.
+
+API testing, bugfixing, and edge cases: 2 hour
+Fixing bugs, debugging and thinking about possible edge cases that can go wrong.
+
+Protocol and finishing up: 1 hour
