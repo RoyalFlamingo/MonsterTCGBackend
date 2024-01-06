@@ -127,24 +127,24 @@ namespace MonsterTCG.Business.Services
 		/// Checks for username/password combination and sets the player token
 		/// </summary>
 		/// <returns>true if login was successful</returns>
-		public async Task<bool> PlayerLogin(string playername, string password)
+		public async Task<string> PlayerLogin(string playername, string password)
 		{
 			var player = await _playerRepository.GetPlayerWithName(playername);
 
 			if (player == null)
-				return false;
+				return null;
 
 			var hashedPassword = BCrypt.Net.BCrypt.Verify(password, player.Password);
 
 			if (!hashedPassword)
-				return false;
+				return null;
 
 			player.Token = GenerateToken(player.AccountName);
 
 			if (!await _playerRepository.UpdatePlayer(player))
-				return false;
+				return null;
 
-			return true;
+			return player.Token;
 		}
 
 		/// <summary>

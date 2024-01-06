@@ -30,12 +30,14 @@ namespace MonsterTCG.Controllers
 				var username = requestData["Username"];
 				var password = requestData["Password"];
 
-				if (await _playerService.PlayerLogin(username, password))
+				var token = await _playerService.PlayerLogin(username, password);
+
+				if (token != null)
 				{
 					return new Response
 					{
 						StatusCode = HttpStatusCode.OK,
-						Content = "User login successful"
+						Content = token
 					};
 				}
 				else
